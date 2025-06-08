@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
+import 'package:kanju/notification_service.dart';
 import 'home.dart';
-import 'overlay_screen.dart';
 
 void main() {
-  runApp(const MyApp());
-}
+  WidgetsFlutterBinding.ensureInitialized();
 
-@pragma("vm:entry-point")
-void accessibilityOverlay() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: OverlayScreen(
-      appName: 'App',
-    ),
-  ));
+  NotificationService().initialize();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
