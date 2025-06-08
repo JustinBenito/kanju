@@ -67,65 +67,68 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Kanju'),
         backgroundColor: Colors.blue,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.blue,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (usedApps.isNotEmpty) ...[
-              const Text(
-                'Today\'s Usage:',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.blue,
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 10),
-              ...usedApps.map((entry) {
-                final appName = monitoredApps[entry.key] ?? entry.key;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    '$appName: ${entry.value} times',
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
+              const SizedBox(height: 20),
+              if (usedApps.isNotEmpty) ...[
+                const Text(
+                  'Today\'s Usage:',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                );
-              }).toList(),
-            ] else
-              const Text(
-                'No apps used today!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
                 ),
+                const SizedBox(height: 10),
+                ...usedApps.map((entry) {
+                  final appName = monitoredApps[entry.key] ?? entry.key;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      '$appName: ${entry.value} times',
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ] else
+                const Text(
+                  'No apps used today!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              const SizedBox(height: 20),
+              Text(
+                _getTagline(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
-            const SizedBox(height: 20),
-            Text(
-              _getTagline(),
-              style: const TextStyle(
-                fontSize: 18,
-                fontStyle: FontStyle.italic,
+              const SizedBox(height: 30),
+              SwitchListTile(
+                title: const Text('Enable Notifications'),
+                value: _notificationsEnabled,
+                onChanged: (value) => _toggleNotifications(),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            SwitchListTile(
-              title: const Text('Enable Notifications'),
-              value: _notificationsEnabled,
-              onChanged: (value) => _toggleNotifications(),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
