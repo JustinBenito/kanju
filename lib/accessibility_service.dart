@@ -12,6 +12,17 @@ class AccessibilityService {
       FlutterLocalNotificationsPlugin();
   final AppUsageTracker _usageTracker = AppUsageTracker();
 
+  final Map<String, String> _monitoredApps = {
+    'com.whatsapp': 'WhatsApp',
+    'com.instagram.android': 'Instagram',
+    'com.facebook.katana': 'Facebook',
+    'com.twitter.android': 'Twitter',
+    'com.snapchat.android': 'Snapchat',
+    'com.tiktok.android': 'TikTok',
+    'com.reddit.frontpage': 'Reddit',
+    'com.pinterest': 'Pinterest',
+  };
+
   final List<String> _insultingMessages = [
     "Oh look, another attempt to waste your life on social media.",
     "Your productivity is crying in the corner.",
@@ -40,10 +51,10 @@ class AccessibilityService {
   Future<void> handleAppOpen(String packageName) async {
     if (!await _usageTracker.areNotificationsEnabled()) return;
 
-    if (packageName == 'com.whatsapp' ||
-        packageName == 'com.instagram.android') {
-      await _usageTracker.incrementUsage();
+    if (_monitoredApps.containsKey(packageName)) {
+      await _usageTracker.incrementUsage(packageName);
       final usageCount = await _usageTracker.getTodayUsage();
+      final appCount = usageCount[packageName] ?? 0;
 
       final random =
           DateTime.now().millisecondsSinceEpoch % _insultingMessages.length;
@@ -51,7 +62,7 @@ class AccessibilityService {
 
       await _showNotification(
         'App Usage Alert',
-        '$message\n\nYou\'ve opened this app $usageCount times today.',
+        '$message\n\nYou\'ve opened ${_monitoredApps[packageName]} $appCount times today.',
       );
     }
   }
@@ -73,4 +84,6 @@ class AccessibilityService {
       notificationDetails,
     );
   }
+
+  Map<String, String> getMonitoredApps() => _monitoredApps;
 }

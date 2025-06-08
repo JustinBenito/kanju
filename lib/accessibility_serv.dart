@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_accessibility_service/constants.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'dart:math';
-import 'notification_service.dart';
 import 'app_usage_tracker.dart';
 
 class AccessibilityService {
@@ -12,6 +12,11 @@ class AccessibilityService {
       AccessibilityService._internal();
   factory AccessibilityService() => _instance;
   AccessibilityService._internal();
+
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
+  final AppUsageTracker _usageTracker = AppUsageTracker();
+  final Random _random = Random();
 
   final Map<String, String> _monitoredApps = {
     'com.google.android.apps.nbu.paisa.user': 'Google Pay',
@@ -36,7 +41,7 @@ class AccessibilityService {
     'com.bob.banking': 'Bank of Baroda',
   };
 
-  final List<String> _insultMessages = [
+  final List<String> _insultingMessages = [
     "Idiot, don't use {app}! You'll end up broke!",
     "Stop being a moron! Close {app} right now!",
     "Are you really that stupid? {app} will drain your bank account!",
@@ -54,13 +59,13 @@ class AccessibilityService {
     "You're a walking financial disaster with {app}!",
   ];
 
-  final NotificationService _notificationService = NotificationService();
-  final AppUsageTracker _usageTracker = AppUsageTracker();
-  final Random _random = Random();
-
   Future<void> initialize() async {
-    // Initialize notification service
-    await _notificationService.initialize();
+    debugPrint('Initializing AccessibilityService');
+
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
+    await _notifications.initialize(initSettings);
 
     // Request accessibility permission
     final bool hasPermission =
@@ -69,6 +74,7 @@ class AccessibilityService {
       debugPrint('Accessibility permission not granted');
       return;
     }
+    debugPrint('Accessibility permission granted');
 
     // Listen to accessibility events
     FlutterAccessibilityService.accessStream.listen((event) async {
@@ -79,31 +85,50 @@ class AccessibilityService {
         // Check for monitored apps
         if (_monitoredApps.containsKey(event.packageName)) {
           debugPrint('Monitored app detected: ${event.packageName}');
-          await _usageTracker.incrementUsage();
+
+          // Increment usage count
+          await _usageTracker.incrementUsage(event.packageName!);
+          debugPrint('Usage count incremented for ${event.packageName}');
 
           if (await _usageTracker.areNotificationsEnabled()) {
-            // Show notification for window state changes (app coming to foreground)
-            if (event.eventType == EventType.typeWindowStateChanged) {
-              _showNotification(event.packageName!);
-            }
-            // Also trigger on window content changes if window state change doesn't work
-            else if (event.eventType == EventType.typeWindowContentChanged) {
-              _showNotification(event.packageName!);
-            }
+            debugPrint('Notifications are enabled, showing notification');
+            await _showNotification(event.packageName!);
           }
         }
       }
     });
   }
 
-  void _showNotification(String packageName) {
-    String appName = _monitoredApps[packageName] ?? 'Unknown App';
-    String message = _insultMessages[_random.nextInt(_insultMessages.length)]
-        .replaceAll('{app}', appName);
+  Future<void> _showNotification(String packageName) async {
+    try {
+      final usageCount = await _usageTracker.getTodayUsage();
+      final appCount = usageCount[packageName] ?? 0;
+      debugPrint('Current usage count for $packageName: $appCount');
 
-    _notificationService.showNotification(
-      'Financial Warning',
-      message,
-    );
+      final random = _random.nextInt(_insultingMessages.length);
+      final message = _insultingMessages[random]
+          .replaceAll('{app}', _monitoredApps[packageName]!);
+
+      const androidDetails = AndroidNotificationDetails(
+        'app_usage_channel',
+        'App Usage Notifications',
+        channelDescription: 'Notifications about app usage',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const notificationDetails = NotificationDetails(android: androidDetails);
+      await _notifications.show(
+        DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        'Financial Warning',
+        '$message\n\nYou\'ve opened ${_monitoredApps[packageName]} $appCount times today.',
+        notificationDetails,
+      );
+      debugPrint('Notification shown for $packageName');
+    } catch (e) {
+      debugPrint('Error showing notification: $e');
+    }
   }
+
+  Map<String, String> getMonitoredApps() => _monitoredApps;
 }
