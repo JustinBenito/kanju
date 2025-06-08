@@ -4,6 +4,7 @@ import 'package:flutter_accessibility_service/constants.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'dart:async';
+import 'overlay_screen.dart';
 
 class AccessibilityService {
   static final AccessibilityService _instance =
@@ -14,6 +15,7 @@ class AccessibilityService {
   final List<String> _monitoredApps = ['com.whatsapp', 'com.instagram.android'];
   bool _isOverlayVisible = false;
   String? _currentPackageName;
+  bool _showNotOkScreen = false;
 
   Future<void> initialize() async {
     // Initialize the accessibility service
@@ -66,12 +68,11 @@ class AccessibilityService {
     debugPrint('=== SHOWING OVERLAY FOR: $packageName ===');
     _isOverlayVisible = true;
     _currentPackageName = packageName;
+    _showNotOkScreen = false;
 
     try {
       debugPrint('Attempting to show overlay window...');
       await FlutterAccessibilityService.showOverlayWindow();
-      debugPrint('Overlay window shown successfully: $_isOverlayVisible');
-      debugPrint('=== SHOWING OVERLAY FOR: $packageName ===');
       debugPrint('Overlay window shown successfully');
     } catch (e) {
       debugPrint('Error in _showOverlay: $e');
@@ -87,9 +88,21 @@ class AccessibilityService {
       debugPrint('Overlay window hidden successfully');
       _isOverlayVisible = false;
       _currentPackageName = null;
+      _showNotOkScreen = false;
     } catch (e) {
       debugPrint('Error in _hideOverlay: $e');
     }
+  }
+
+  Future<void> showNotOkScreen() async {
+    debugPrint('=== SHOWING NOT OK SCREEN ===');
+    if (!_isOverlayVisible) {
+      debugPrint('No overlay visible to transition from');
+      return;
+    }
+
+    _showNotOkScreen = true;
+    debugPrint('Not OK screen state updated');
   }
 
   Future<void> handleUserResponse(bool isOk) async {
@@ -109,11 +122,18 @@ class AccessibilityService {
         FlutterExitApp.exitApp();
       } catch (e) {
         await _hideOverlay();
-
         debugPrint('Exit app failed: $e');
         SystemNavigator.pop();
       }
       debugPrint('App is closed');
     }
+  }
+
+  Widget getOverlayScreen() {
+    debugPrint('Getting overlay screen. showNotOkScreen: $_showNotOkScreen');
+    if (_showNotOkScreen) {
+      return const NotOkOverlayScreen();
+    }
+    return OverlayScreen(appName: _currentPackageName ?? '');
   }
 }
