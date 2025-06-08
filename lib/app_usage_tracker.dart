@@ -1,4 +1,4 @@
-import 'package:shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppUsageTracker {
   static final AppUsageTracker _instance = AppUsageTracker._internal();
