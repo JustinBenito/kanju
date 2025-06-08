@@ -1,16 +1,61 @@
-# kanju
+# kanju the Finsulter
 
-A new Flutter project.
+![alt text](assets/logo.png)
+
+Are you burning through all your money mindlessly ?
+Do you wish there was someone to stop you from that.
+
+## Features
+
+- Real-time app usage monitoring
+- Focus on financial and payment applications
+- Usage statistics and tracking
+- Motivational ( Insults ) messages based on usage patterns
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Installation
 
-A few resources to get you started if this is your first Flutter project:
+1. Clone the repository:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+git clone https://github.com/JustinBenito/kanju.git
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+2. Navigate to the project directory:
+
+```bash
+cd kanju
+```
+
+3. Install dependencies:
+
+```bash
+flutter pub get
+```
+
+4. Run the app:
+
+```bash
+flutter run
+```
+
+## Usage
+
+1. Launch the app
+2. Grant necessary permissions for app usage monitoring
+3. Enable notifications if desired
+4. The app will automatically start monitoring your app usage
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. Will add a Contributing.md soon ( you can help with that too... )
+
+## License
+
+This project is licensed under the GPL 3 License - see the LICENSE.md file for details.
+
+## Acknowledgments
+
+This single tweet inspired me to build this
+https://x.com/sharonnkv/status/1930876563534557564
