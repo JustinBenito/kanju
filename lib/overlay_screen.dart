@@ -1,67 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
+import 'accessibility_serv.dart';
+import 'dart:async';
 
-class OverlayScreen extends StatelessWidget {
+class OverlayScreen extends StatefulWidget {
   final String appName;
-  final Function(bool) onResponse;
 
   const OverlayScreen({
     super.key,
     required this.appName,
-    required this.onResponse,
   });
 
   @override
+  State<OverlayScreen> createState() => _OverlayScreenState();
+}
+
+class _OverlayScreenState extends State<OverlayScreen> {
+  int _countdown = 10;
+  Timer? _timer;
+  bool _isNotOkPressed = false;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          timer.cancel();
+          AccessibilityService().handleUserResponse(true);
+          Navigator.of(context).pop();
+        }
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint('Building OverlayScreen. isNotOkPressed: $_isNotOkPressed');
+
     return Material(
-      color: Colors.black.withOpacity(0.8),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(20),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'You are using an app',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'You are about to enter $appName',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => onResponse(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+      color: Colors.black.withOpacity(0.9),
+      child: SafeArea(
+        child: Center(
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              key: ValueKey(_isNotOkPressed),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!_isNotOkPressed) ...[
+                  const Text(
+                    'You are using an app',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    child: const Text('Ok'),
                   ),
-                  ElevatedButton(
-                    onPressed: () => onResponse(false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                  const SizedBox(height: 10),
+                  Text(
+                    'You are about to enter ${widget.appName}',
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          debugPrint('OK button pressed');
+                          _startCountdown();
+                        },
+                        child: Text(_countdown > 0 ? 'OK ($_countdown)' : 'OK'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          debugPrint('Not OK button pressed - before setState');
+                          _timer?.cancel(); // Cancel countdown if running
+                          setState(() {
+                            _isNotOkPressed = true;
+                            debugPrint(
+                                '_isNotOkPressed set to: $_isNotOkPressed');
+                          });
+                          debugPrint('Not OK button pressed - after setState');
+                        },
+                        child: const Text('Not OK'),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  const Center(
+                    child: Text(
+                      'You are doing great, now close this app idiot',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: const Text('Not Okay!'),
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-} 
+}

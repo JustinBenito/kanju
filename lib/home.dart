@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'accessibility_service.dart';
+import 'accessibility_serv.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initializeAccessibilityService() async {
-    await AppAccessibilityService().initialize();
+    await AccessibilityService().initialize();
   }
 
   @override
@@ -26,9 +26,12 @@ class _HomePageState extends State<HomePage> {
         title: const Text('App Usage Monitor'),
       ),
       body: const Center(
-        child: Text(
-          'Monitoring WhatsApp and Instagram usage...',
-          style: TextStyle(fontSize: 18),
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            'Monitoring WhatsApp and Instagram usage...',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
-import 'accessibility_service.dart';
 import 'home.dart';
 import 'overlay_screen.dart';
 
@@ -14,9 +13,6 @@ void accessibilityOverlay() {
     debugShowCheckedModeBanner: false,
     home: OverlayScreen(
       appName: 'App',
-      onResponse: (response) {
-        // Handle response
-      },
     ),
   ));
 }
