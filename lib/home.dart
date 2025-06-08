@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kanju/notification_service.dart';
-import 'accessibility_serv.dart';
+import 'accessibility_service.dart';
 import 'app_usage_tracker.dart';
 
 class HomePage extends StatefulWidget {
